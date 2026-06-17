@@ -1,0 +1,224 @@
+/* ===================================================================
+   EYAL-9000 — עיצוב ארגוני (כיוון A)
+   כחול/לבן, נקי, "מוצר אמיתי". RTL.
+   =================================================================== */
+
+:root {
+  --navy: #0a3d7a;
+  --navy-dark: #072b57;
+  --blue: #1f6fd1;
+  --green: #1f8a4c;
+  --bg: #eef2f8;
+  --card: #ffffff;
+  --ink: #1a2b4a;
+  --muted: #5b6b85;
+  --line: #dde3ee;
+  --danger: #c0392b;
+  --radius: 12px;
+  --shadow: 0 8px 30px rgba(10, 61, 122, 0.10);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Heebo', system-ui, Arial, sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  line-height: 1.6;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ---------- סרגל עליון ---------- */
+.topbar {
+  background: var(--navy);
+  color: #fff;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+.topbar-inner {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 14px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+.brand { display: flex; align-items: baseline; gap: 6px; font-weight: 700; }
+.brand-mark { font-size: 18px; color: #7fb2ff; }
+.brand-name { letter-spacing: 1px; font-size: 17px; }
+.brand-trade { font-size: 11px; opacity: 0.7; }
+.topbar-meta { font-size: 12px; opacity: 0.8; }
+
+/* ---------- מבנה ---------- */
+#app {
+  flex: 1;
+  max-width: 760px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 34px 20px 60px;
+}
+.screen { display: none; animation: fade 0.5s ease; }
+.screen.active { display: block; }
+@keyframes fade { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+
+.screen-title { color: var(--navy); font-size: 26px; margin-bottom: 8px; }
+.screen-lead { color: var(--muted); font-size: 16px; margin-bottom: 24px; }
+
+/* ---------- מסך נחיתה ---------- */
+.hero { text-align: center; padding-top: 12px; }
+.tagline {
+  font-family: 'Roboto Mono', monospace;
+  font-size: 12px; letter-spacing: 3px; color: var(--blue);
+  margin-bottom: 14px;
+}
+.hero-title { font-size: 34px; line-height: 1.25; color: var(--navy); font-weight: 900; }
+.hero-sub { color: var(--muted); font-size: 16px; max-width: 540px; margin: 16px auto 26px; }
+
+.kt-card {
+  background: var(--card); border: 1px solid var(--line);
+  border-radius: var(--radius); padding: 18px 20px; box-shadow: var(--shadow);
+  max-width: 480px; margin: 0 auto 28px; text-align: right;
+}
+.kt-label { font-size: 13px; color: var(--muted); margin-bottom: 10px; }
+.kt-pct { font-size: 13px; color: var(--green); margin-top: 8px; font-weight: 500; }
+
+.progress-track { background: #e6ebf5; border-radius: 20px; height: 12px; overflow: hidden; }
+.progress-track.slim { height: 7px; }
+.progress-fill {
+  background: linear-gradient(90deg, var(--green), #28a85f);
+  height: 100%; border-radius: 20px; transition: width 0.6s ease;
+}
+
+.hero-note {
+  margin-top: 22px; font-size: 11px; color: #97a4bc;
+  font-family: 'Roboto Mono', monospace; letter-spacing: 0.5px;
+}
+
+/* ---------- כפתורים ---------- */
+.btn-primary {
+  background: var(--navy); color: #fff; border: none;
+  padding: 14px 30px; border-radius: 8px; font-size: 16px; font-weight: 500;
+  font-family: inherit; cursor: pointer; transition: background 0.2s, transform 0.1s;
+  box-shadow: 0 4px 14px rgba(10, 61, 122, 0.25);
+}
+.btn-primary:hover { background: var(--navy-dark); }
+.btn-primary:active { transform: translateY(1px); }
+
+/* ---------- מסך תדריך ---------- */
+.stat-grid {
+  display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; margin-bottom: 24px;
+}
+.stat {
+  background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
+  padding: 20px; text-align: center; box-shadow: var(--shadow);
+}
+.stat-num {
+  font-size: 30px; font-weight: 900; color: var(--navy);
+  font-family: 'Roboto Mono', monospace;
+}
+.stat-cap { font-size: 13px; color: var(--muted); margin-top: 4px; }
+
+.callout {
+  background: #eaf2fd; border-right: 4px solid var(--blue);
+  padding: 16px 18px; border-radius: 8px; font-size: 15px;
+  color: var(--ink); margin-bottom: 26px;
+}
+
+/* ---------- לומדה ---------- */
+.quiz-head { margin-bottom: 22px; }
+.quiz-step {
+  font-family: 'Roboto Mono', monospace; font-size: 13px;
+  color: var(--blue); margin-bottom: 10px;
+}
+.question-text { color: var(--navy); font-size: 22px; margin-bottom: 22px; }
+.answers { display: flex; flex-direction: column; gap: 12px; }
+.answer {
+  background: var(--card); border: 2px solid var(--line); border-radius: 10px;
+  padding: 15px 18px; font-size: 16px; cursor: pointer; text-align: right;
+  transition: border-color 0.15s, background 0.15s; display: flex; align-items: center; gap: 12px;
+}
+.answer:hover { border-color: var(--blue); background: #f6f9ff; }
+.answer .marker {
+  width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--line);
+  flex-shrink: 0;
+}
+.answer.chosen { border-color: var(--navy); background: #eef4fc; pointer-events: none; }
+.answer.chosen .marker { background: var(--navy); border-color: var(--navy); }
+.answer.correct { border-color: var(--green); background: #eafaf0; }
+.answer.correct .marker { background: var(--green); border-color: var(--green); }
+
+.feedback {
+  margin-top: 18px; font-size: 15px; color: var(--green); min-height: 24px;
+  font-weight: 500; opacity: 0; transition: opacity 0.3s;
+}
+.feedback.show { opacity: 1; }
+
+/* ---------- עיבוד ---------- */
+.proc-wrap { text-align: center; padding-top: 30px; }
+.proc-ring {
+  width: 70px; height: 70px; margin: 0 auto 24px; border-radius: 50%;
+  border: 5px solid #d8e2f2; border-top-color: var(--navy);
+  animation: spin 0.9s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.proc-log {
+  font-family: 'Roboto Mono', monospace; font-size: 13px; color: var(--muted);
+  text-align: right; background: #f4f7fc; border: 1px solid var(--line);
+  border-radius: 8px; padding: 14px; height: 140px; overflow: hidden;
+  margin: 20px auto; max-width: 460px; direction: ltr;
+}
+.proc-log div { opacity: 0; animation: logIn 0.3s forwards; }
+@keyframes logIn { to { opacity: 1; } }
+.proc-pct { font-family: 'Roboto Mono', monospace; color: var(--navy); margin-top: 10px; font-size: 15px; }
+
+/* ---------- תוצאה + טוויסט ---------- */
+.result-card {
+  background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
+  box-shadow: var(--shadow); padding: 30px; text-align: center;
+}
+.result-stamp {
+  display: inline-block; font-family: 'Roboto Mono', monospace; font-size: 12px;
+  letter-spacing: 2px; color: var(--danger); border: 1px solid var(--danger);
+  padding: 4px 12px; border-radius: 4px; margin-bottom: 18px;
+}
+.result-title { color: var(--navy); font-size: 24px; margin-bottom: 14px; }
+.result-body { color: var(--ink); font-size: 16px; margin-bottom: 20px; }
+.result-divider { height: 1px; background: var(--line); margin: 20px 0; }
+.result-verdict {
+  font-size: 18px; font-weight: 700; color: var(--danger);
+  background: #fdecea; border-radius: 8px; padding: 16px; margin-bottom: 24px;
+}
+
+/* ---------- חשיפה ---------- */
+.reveal { display: none; text-align: center; padding-top: 36px; animation: pop 0.6s ease; }
+.reveal.show { display: block; }
+@keyframes pop { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: none; } }
+.reveal-photo {
+  width: 150px; height: 150px; margin: 0 auto 22px; border-radius: 50%;
+  background: #fff3d6; display: flex; align-items: center; justify-content: center;
+  font-size: 80px; box-shadow: var(--shadow); overflow: hidden;
+}
+.reveal-photo img { width: 100%; height: 100%; object-fit: cover; }
+.reveal-title { font-size: 40px; color: var(--navy); font-weight: 900; }
+.reveal-sub { color: var(--muted); font-size: 17px; margin: 16px auto; max-width: 460px; }
+.reveal-sign { font-size: 20px; color: var(--navy); font-weight: 700; margin-top: 18px; }
+
+/* ---------- פוטר ---------- */
+.footer {
+  text-align: center; font-size: 11px; color: #97a4bc;
+  font-family: 'Roboto Mono', monospace; padding: 18px; letter-spacing: 0.5px;
+}
+
+/* ---------- רספונסיב ---------- */
+@media (max-width: 560px) {
+  .hero-title { font-size: 27px; }
+  .stat-grid { grid-template-columns: 1fr 1fr; }
+  .stat-num { font-size: 24px; }
+  .topbar-meta { display: none; }
+  .question-text { font-size: 19px; }
+}

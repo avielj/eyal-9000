@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EYAL-9000 · Audit Intelligence Platform</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <!-- סרגל עליון קבוע -->
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <span class="brand-mark">⬡</span>
+        <span class="brand-name" id="brandName">EYAL-9000</span>
+        <span class="brand-trade">™</span>
+      </div>
+      <div class="topbar-meta" id="topbarMeta">אגף הביקורת הפנימית · חדשנות &amp; IT</div>
+    </div>
+  </header>
+
+  <main id="app">
+
+    <!-- ===== מסך 1: דף נחיתה ===== -->
+    <section class="screen active" data-screen="landing">
+      <div class="hero">
+        <div class="tagline" id="tagline">AUDIT INTELLIGENCE PLATFORM</div>
+        <h1 class="hero-title">מערכת ביקורת אוטונומית<br>מבוססת בינה מלאכותית</h1>
+        <p class="hero-sub" id="heroSub"></p>
+
+        <div class="kt-card">
+          <div class="kt-label">העברת ידע מהמבקר האנושי</div>
+          <div class="progress-track"><div class="progress-fill" style="width:82%"></div></div>
+          <div class="kt-pct">82% הושלם</div>
+        </div>
+
+        <button class="btn-primary" data-action="start">התחל תהליך חפיפה ←</button>
+        <div class="hero-note">מסמך פנימי · סיווג: לעיני המבקר בלבד · אין להעביר</div>
+      </div>
+    </section>
+
+    <!-- ===== מסך 2: תדריך ===== -->
+    <section class="screen" data-screen="briefing">
+      <h2 class="screen-title">סיכום ניתוח ראשוני</h2>
+      <p class="screen-lead" id="briefLead"></p>
+
+      <div class="stat-grid">
+        <div class="stat"><div class="stat-num" data-count="12047">0</div><div class="stat-cap">הערות ביקורת נותחו</div></div>
+        <div class="stat"><div class="stat-num" data-count="4512">0</div><div class="stat-cap">המלצות לתיקון ליקויים</div></div>
+        <div class="stat"><div class="stat-num" data-count="27">0</div><div class="stat-cap">שנות ניסיון מצטבר</div></div>
+        <div class="stat"><div class="stat-num" data-count="93" data-suffix=".7%">0</div><div class="stat-cap">מהחלטותיך ניתנות לחיזוי</div></div>
+      </div>
+
+      <div class="callout">
+        על מנת להשלים את העברת הידע ולכייל את <strong>רמת החשדנות האופטימלית</strong>,
+        נדרש אימות זהות קצר. אנא ענה על השאלות הבאות בכנות מקצועית.
+      </div>
+
+      <button class="btn-primary" data-action="toQuiz">המשך לאימות זהות ←</button>
+    </section>
+
+    <!-- ===== מסך 3: לומדה ===== -->
+    <section class="screen" data-screen="quiz">
+      <div class="quiz-head">
+        <div class="quiz-step">שאלה <span id="qNum">1</span> מתוך <span id="qTotal">5</span></div>
+        <div class="progress-track slim"><div class="progress-fill" id="quizProgress" style="width:0%"></div></div>
+      </div>
+      <h2 class="question-text" id="questionText"></h2>
+      <div class="answers" id="answers"></div>
+      <div class="feedback" id="feedback"></div>
+    </section>
+
+    <!-- ===== מסך 4: עיבוד ===== -->
+    <section class="screen" data-screen="processing">
+      <div class="proc-wrap">
+        <div class="proc-ring"></div>
+        <h2 class="screen-title">מעבד את פרופיל המבקר</h2>
+        <div class="proc-log" id="procLog"></div>
+        <div class="progress-track"><div class="progress-fill" id="procProgress" style="width:0%"></div></div>
+        <div class="proc-pct" id="procPct">0%</div>
+      </div>
+    </section>
+
+    <!-- ===== מסך 5: טוויסט + חשיפה ===== -->
+    <section class="screen" data-screen="result">
+      <div class="result-card">
+        <div class="result-stamp">ניתוח הושלם</div>
+        <h2 class="result-title">מסקנת המערכת</h2>
+        <p class="result-body" id="resultBody"></p>
+        <div class="result-divider"></div>
+        <div class="result-verdict" id="resultVerdict"></div>
+        <button class="btn-primary" data-action="reveal">לצפייה בהחלטת הוועדה ←</button>
+      </div>
+
+      <div class="reveal" id="reveal">
+        <div class="reveal-photo" id="revealPhoto">🐒</div>
+        <h1 class="reveal-title">מתחתי אותך! 🎉</h1>
+        <p class="reveal-sub">אין מערכת AI. יש רק הוקרה עצומה.<br>27 שנים של ביקורת יסודית — אין מה שיחליף את זה.</p>
+        <p class="reveal-sign" id="revealSign">מזל טוב על הפרישה, משה! ❤️</p>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="footer" id="footer">© <span id="year"></span> · גרסה 9.0.0 · מסמך פנימי</footer>
+
+  <script src="config.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
