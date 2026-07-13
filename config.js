@@ -21,6 +21,6 @@ window.CONFIG = {
   // --- תמונות (placeholder עד שתשלח תמונות אמיתיות של משה) ---
   // אפשר לשים נתיב לקובץ ב-assets/ במקום אימוג'י הקוף.
   photos: {
-    reveal: "",     // לדוגמה: "assets/moshe-1.jpg" — ריק = אימוג'י קוף 🐒
+    reveal: "assets/moshe-reveal.jpg",     // ריק = אימוג'י קוף 🐒
   },
 };
