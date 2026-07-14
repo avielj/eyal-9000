@@ -106,7 +106,7 @@
     var years = CFG.yearsOfService || 27;
     var company = CFG.companyName || "אגף הביקורת הפנימית";
 
-    setText("brandName", CFG.productName || "EYAL-9000");
+    setText("brandName", CFG.productName || "Onboarding Process");
     setText("tagline", CFG.productTagline || "AUDIT INTELLIGENCE PLATFORM");
     setText("topbarMeta", company + " · חדשנות & IT");
     setText("year", "2026");

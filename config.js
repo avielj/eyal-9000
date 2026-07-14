@@ -6,7 +6,7 @@
 window.CONFIG = {
   // --- מיתוג ---
   companyName: "אגף הביקורת הפנימית",      // לדוגמה: "ICL Audit Intelligence" — מלא מאוחר יותר
-  productName: "EYAL-9000",
+  productName: "Onboarding Process",
   productTagline: "AUDIT INTELLIGENCE PLATFORM",
   targetName: "משה דנה",
   yearsOfService: 27,
