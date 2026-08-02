@@ -208,6 +208,55 @@ body {
 .reveal-sub { color: var(--muted); font-size: 17px; margin: 16px auto; max-width: 460px; }
 .reveal-sign { font-size: 20px; color: var(--navy); font-weight: 700; margin-top: 18px; }
 
+/* ---------- אימות סיום למידה ---------- */
+.confirm-card {
+  background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
+  box-shadow: var(--shadow); padding: 22px 20px; margin: 32px auto 0;
+  max-width: 480px; text-align: center;
+}
+.confirm-label {
+  font-family: 'Roboto Mono', monospace; font-size: 12px; letter-spacing: 2px;
+  color: var(--blue); margin-bottom: 10px;
+}
+.confirm-lead { font-size: 14px; color: var(--muted); margin-bottom: 18px; }
+
+.btn-confirm {
+  background: var(--green); color: #fff; border: none;
+  padding: 14px 30px; border-radius: 8px; font-size: 16px; font-weight: 500;
+  font-family: inherit; cursor: pointer; transition: background 0.2s, transform 0.1s;
+  box-shadow: 0 4px 14px rgba(31, 138, 76, 0.25);
+}
+.btn-confirm:hover { background: #17703d; }
+.btn-confirm:active { transform: translateY(1px); }
+.btn-confirm.done {
+  background: #eafaf0; color: var(--green); border: 1px solid var(--green);
+  box-shadow: none; cursor: default;
+}
+
+.confirm-receipt {
+  display: none; margin-top: 18px; text-align: right;
+  background: #f4f7fc; border: 1px solid var(--line); border-radius: 8px;
+  padding: 14px; font-size: 13px;
+}
+.confirm-receipt.show { display: block; animation: fade 0.4s ease; }
+.confirm-receipt .receipt-title {
+  color: var(--green); font-weight: 700; margin-bottom: 8px; font-size: 14px;
+}
+.confirm-receipt .receipt-row {
+  display: flex; gap: 8px; justify-content: space-between;
+  border-top: 1px dashed var(--line); padding: 5px 0;
+}
+.confirm-receipt .receipt-row:first-of-type { border-top: none; }
+.confirm-receipt .receipt-key { color: var(--muted); flex-shrink: 0; }
+.confirm-receipt .receipt-val {
+  font-family: 'Roboto Mono', monospace; font-size: 12px; color: var(--ink);
+  direction: ltr; text-align: left; word-break: break-word;
+}
+.confirm-receipt .receipt-id {
+  margin-top: 10px; font-family: 'Roboto Mono', monospace; font-size: 11px;
+  color: #97a4bc; letter-spacing: 0.5px; text-align: center;
+}
+
 /* ---------- פוטר ---------- */
 .footer {
   text-align: center; font-size: 11px; color: #97a4bc;

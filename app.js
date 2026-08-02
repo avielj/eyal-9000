@@ -89,6 +89,172 @@
     }).catch(function () { /* שקט — לא מפריע לחוויה */ });
   }
 
+  // ---------- לוג אימות סיום למידה ----------
+  var LOG_KEY = "eyal9000_completion_log";
+  var PAGE_LOADED_AT = Date.now();
+
+  function safe(fn, fallback) {
+    try {
+      var v = fn();
+      return (v === undefined || v === null || v === "") ? fallback : v;
+    } catch (e) { return fallback; }
+  }
+
+  // אוסף את כל פרטי הדפדפן והסביבה עבור הלוג
+  function collectDetails() {
+    var now = new Date();
+    var n = navigator || {};
+    var s = window.screen || {};
+    var conn = safe(function () {
+      return n.connection || n.mozConnection || n.webkitConnection;
+    }, null);
+    var uaData = safe(function () { return n.userAgentData; }, null);
+
+    return {
+      // --- חותמת זמן ---
+      timestampISO: now.toISOString(),
+      timestampLocal: safe(function () {
+        return now.toLocaleString("he-IL", { hour12: false });
+      }, String(now)),
+      epochMs: now.getTime(),
+      timezone: safe(function () {
+        return Intl.DateTimeFormat().resolvedOptions().timeZone;
+      }, "לא ידוע"),
+      timezoneOffsetMin: now.getTimezoneOffset(),
+      secondsOnPage: Math.round((Date.now() - PAGE_LOADED_AT) / 1000),
+
+      // --- דפדפן ומכשיר ---
+      userAgent: safe(function () { return n.userAgent; }, "לא ידוע"),
+      platform: safe(function () {
+        return (uaData && uaData.platform) || n.platform;
+      }, "לא ידוע"),
+      browserBrands: safe(function () {
+        return uaData.brands.map(function (b) { return b.brand + " " + b.version; }).join(", ");
+      }, "לא זמין"),
+      isMobile: safe(function () {
+        return uaData ? String(uaData.mobile) : String(/Mobi|Android|iPhone|iPad/i.test(n.userAgent || ""));
+      }, "לא ידוע"),
+      vendor: safe(function () { return n.vendor; }, "לא ידוע"),
+      language: safe(function () { return n.language; }, "לא ידוע"),
+      languages: safe(function () { return (n.languages || []).join(", "); }, "לא ידוע"),
+
+      // --- מסך ותצוגה ---
+      screenSize: safe(function () { return s.width + "x" + s.height; }, "לא ידוע"),
+      viewportSize: window.innerWidth + "x" + window.innerHeight,
+      pixelRatio: safe(function () { return window.devicePixelRatio; }, 1),
+      colorDepth: safe(function () { return s.colorDepth; }, "לא ידוע"),
+      orientation: safe(function () { return s.orientation.type; }, "לא ידוע"),
+
+      // --- חומרה ורשת ---
+      cpuCores: safe(function () { return n.hardwareConcurrency; }, "לא זמין"),
+      deviceMemoryGB: safe(function () { return n.deviceMemory; }, "לא זמין"),
+      touchPoints: safe(function () { return n.maxTouchPoints; }, 0),
+      online: safe(function () { return String(n.onLine); }, "לא ידוע"),
+      connectionType: safe(function () { return conn.effectiveType; }, "לא זמין"),
+      downlinkMbps: safe(function () { return conn.downlink; }, "לא זמין"),
+
+      // --- הקשר ---
+      url: safe(function () { return location.href; }, "לא ידוע"),
+      referrer: safe(function () { return document.referrer; }, "ישיר / ללא מפנה"),
+      cookiesEnabled: safe(function () { return String(n.cookieEnabled); }, "לא ידוע"),
+      doNotTrack: safe(function () { return n.doNotTrack || window.doNotTrack; }, "לא הוגדר"),
+    };
+  }
+
+  function readLog() {
+    try { return JSON.parse(localStorage.getItem(LOG_KEY) || "[]"); }
+    catch (e) { return []; }
+  }
+
+  function writeLog(entries) {
+    try { localStorage.setItem(LOG_KEY, JSON.stringify(entries)); } catch (e) {}
+  }
+
+  // מזהה ייחוד לרשומת הלוג (ללא תלות בספריות חיצוניות)
+  function makeLogId(details) {
+    var seed = details.epochMs.toString(36) + Math.random().toString(36).slice(2, 8);
+    return "ACK-" + seed.toUpperCase();
+  }
+
+  function logCompletion() {
+    var details = collectDetails();
+    var entries = readLog();
+    var entry = {
+      id: makeLogId(details),
+      event: "learning_completion_confirmed",
+      clickNumber: entries.length + 1,
+      target: CFG.targetName || "המבקר",
+      details: details,
+    };
+    entries.push(entry);
+    writeLog(entries);
+
+    // לוג לקונסול — מוכח וניתן לבדיקה
+    console.log("%c[LEARNING-COMPLETION] אימות סיום למידה נלחץ", "color:#1f8a4c;font-weight:bold");
+    console.log(entry);
+    try { console.table(details); } catch (e) {}
+
+    // שליחה לטלגרם (אם המעקב מופעל)
+    track(
+      "✅ לחץ על 'אמת סיום למידה'\n" +
+      "🆔 מזהה: " + entry.id + "\n" +
+      "🔁 לחיצה מס': " + entry.clickNumber + "\n" +
+      "🕐 זמן מקומי: " + details.timestampLocal + "\n" +
+      "🌍 UTC: " + details.timestampISO + "\n" +
+      "🗺️ אזור זמן: " + details.timezone + " (offset " + details.timezoneOffsetMin + ")\n" +
+      "⏱️ זמן בדף: " + details.secondsOnPage + " שניות\n" +
+      "💻 פלטפורמה: " + details.platform + " | נייד: " + details.isMobile + "\n" +
+      "🧭 דפדפן: " + details.browserBrands + "\n" +
+      "🖥️ מסך: " + details.screenSize + " | חלון: " + details.viewportSize +
+      " | DPR: " + details.pixelRatio + "\n" +
+      "🗣️ שפה: " + details.language + " (" + details.languages + ")\n" +
+      "⚙️ ליבות: " + details.cpuCores + " | זיכרון: " + details.deviceMemoryGB +
+      "GB | מגע: " + details.touchPoints + "\n" +
+      "📶 חיבור: " + details.connectionType + " (" + details.downlinkMbps + " Mbps)\n" +
+      "🔗 מפנה: " + details.referrer + "\n" +
+      "🧾 UA: " + details.userAgent
+    );
+
+    return entry;
+  }
+
+  // ---------- הצגת אישור על המסך ----------
+  function renderReceipt(entry) {
+    var box = document.getElementById("confirmReceipt");
+    if (!box) return;
+    var d = entry.details;
+    var rows = [
+      ["חותמת זמן", d.timestampLocal],
+      ["UTC", d.timestampISO],
+      ["אזור זמן", d.timezone + " (" + d.timezoneOffsetMin + ")"],
+      ["זמן בדף", d.secondsOnPage + " שניות"],
+      ["פלטפורמה", d.platform],
+      ["דפדפן", d.browserBrands !== "לא זמין" ? d.browserBrands : d.userAgent],
+      ["מכשיר נייד", d.isMobile],
+      ["מסך / חלון", d.screenSize + " / " + d.viewportSize + " @" + d.pixelRatio + "x"],
+      ["שפה", d.language],
+      ["ליבות / זיכרון", d.cpuCores + " / " + d.deviceMemoryGB + "GB"],
+      ["חיבור רשת", d.connectionType],
+      ["לחיצה מספר", String(entry.clickNumber)],
+    ];
+
+    var html = '<div class="receipt-title">✓ סיום הלמידה תועד בהצלחה</div>';
+    rows.forEach(function (r) {
+      html += '<div class="receipt-row"><span class="receipt-key">' + r[0] +
+        '</span><span class="receipt-val">' + escapeHtml(String(r[1])) + "</span></div>";
+    });
+    html += '<div class="receipt-id">מזהה תיעוד: ' + entry.id + "</div>";
+
+    box.innerHTML = html;
+    box.classList.add("show");
+  }
+
+  function escapeHtml(str) {
+    return str.replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  }
+
   // ---------- ניווט מסכים ----------
   function show(name) {
     var screens = document.querySelectorAll(".screen");
@@ -264,6 +430,13 @@
       track("הגיע לחשיפה — תפס שזו מתיחה 🎉");
       document.getElementById("reveal").classList.add("show");
       btn.style.display = "none";
+    } else if (action === "confirmLearning") {
+      var entry = logCompletion();
+      renderReceipt(entry);
+      btn.textContent = "✓ סיום הלמידה אומת · " +
+        entry.details.timestampLocal.split(",").pop().trim();
+      btn.classList.add("done");
+      btn.disabled = true;
     }
   });
 
