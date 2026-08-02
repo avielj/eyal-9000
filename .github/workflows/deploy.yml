@@ -1,0 +1,68 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      # מזריק את פרטי הבוט מ-Secrets לתוך config.js בזמן הבנייה.
+      # הערכים לא יושבים ב-repo ולא בהיסטוריה — רק בארטיפקט שנפרס.
+      - name: Inject Telegram credentials
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          if [ -z "$TELEGRAM_BOT_TOKEN" ] || [ -z "$TELEGRAM_CHAT_ID" ]; then
+            echo "::warning::TELEGRAM_BOT_TOKEN / TELEGRAM_CHAT_ID not set — deploying with tracking off."
+            node --check config.js
+            exit 0
+          fi
+
+          node - <<'EOF'
+          const fs = require("fs");
+          const file = "config.js";
+          const js = (s) => JSON.stringify(String(s));
+          let src = fs.readFileSync(file, "utf8");
+          const before = src;
+
+          src = src.replace(/(botToken:\s*)"[^"]*"/, `$1${js(process.env.TELEGRAM_BOT_TOKEN)}`);
+          src = src.replace(/(chatId:\s*)"[^"]*"/, `$1${js(process.env.TELEGRAM_CHAT_ID)}`);
+
+          if (src === before) {
+            console.error("ERROR: botToken/chatId placeholders not found in config.js");
+            process.exit(1);
+          }
+          fs.writeFileSync(file, src);
+          EOF
+
+          node --check config.js
+          if grep -q 'botToken: ""' config.js; then
+            echo "::error::injection ran but botToken is still empty"
+            exit 1
+          fi
+          echo "Telegram credentials injected into config.js"
+
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
+      - id: deployment
+        uses: actions/deploy-pages@v4
