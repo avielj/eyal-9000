@@ -66,3 +66,44 @@ jobs:
           path: .
       - id: deployment
         uses: actions/deploy-pages@v4
+
+      # בדיקת שפיות לבוט — שולח הודעת אימות אחרי כל דיפלוי.
+      # תופס מראש את שלושת הכשלים הנפוצים: טוקן שגוי, chat_id שגוי,
+      # ובוט שלא לחצו עליו Start (טלגרם חוסם שליחה יזומה למשתמש).
+      - name: Verify Telegram bot
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          PAGE_URL: ${{ steps.deployment.outputs.page_url }}
+        run: |
+          if [ -z "$TELEGRAM_BOT_TOKEN" ] || [ -z "$TELEGRAM_CHAT_ID" ]; then
+            echo "::warning::Telegram secrets not set — skipping bot verification."
+            exit 0
+          fi
+
+          TEXT="🤖 בדיקת מערכת — הבוט עובד.
+
+          האתר באוויר: ${PAGE_URL}
+          commit: ${GITHUB_SHA:0:7}
+
+          מכאן והלאה תקבל כאן התראה על כל צעד בתהליך."
+
+          RESP=$(curl -sS --max-time 20 -X POST \
+            "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+            --data-urlencode "chat_id=${TELEGRAM_CHAT_ID}" \
+            --data-urlencode "text=${TEXT}")
+
+          if echo "$RESP" | grep -q '"ok":true'; then
+            echo "✅ Telegram verified — test message delivered."
+            exit 0
+          fi
+
+          DESC=$(echo "$RESP" | sed -n 's/.*"description":"\([^"]*\)".*/\1/p')
+          echo "::error::Telegram verification FAILED: ${DESC:-$RESP}"
+          case "$DESC" in
+            *"initiate conversation"*|*"chat not found"*)
+              echo "::error::פתח את הצ'אט עם הבוט בטלגרם, לחץ Start, והרץ מחדש (Re-run jobs)." ;;
+            *Unauthorized*)
+              echo "::error::TELEGRAM_BOT_TOKEN שגוי, או שהבוט נמחק ב-BotFather." ;;
+          esac
+          exit 1
