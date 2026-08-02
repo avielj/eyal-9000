@@ -82,11 +82,20 @@
     }
     var url = "https://api.telegram.org/bot" + tg.botToken + "/sendMessage";
     var text = "🕵️ " + (CFG.targetName || "המבקר") + " · " + message;
+    // כשל בשליחה לעולם לא מפריע לחוויה של המשתמש — רק נרשם לקונסול,
+    // כדי שיהיה אפשר לאבחן (הכשל הנפוץ: לא לחצת Start על הבוט).
     fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ chat_id: tg.chatId, text: text }),
-    }).catch(function () { /* שקט — לא מפריע לחוויה */ });
+    })
+      .then(function (res) {
+        if (!res.ok) {
+          console.warn("[TRACK] טלגרם החזיר " + res.status +
+            " — בדוק שה-token נכון ושלחצת Start על הבוט מהצ'אט הזה");
+        }
+      })
+      .catch(function (e) { console.warn("[TRACK] שליחה נכשלה:", e); });
   }
 
   // ---------- לוג אימות סיום למידה ----------
@@ -304,6 +313,35 @@
     if (el) el.textContent = txt;
   }
 
+  // ---------- אנימציית "העברת ידע" (מסך נחיתה) ----------
+  // מטפס מ-0% ל-82% עם האטה לקראת הסוף, כדי שייראה כמו תהליך אמיתי
+  // ולא כמו מספר קבוע שנצבע מראש.
+  function animateKnowledgeTransfer() {
+    var fill = document.getElementById("ktProgress");
+    var label = document.getElementById("ktPct");
+    if (!fill || !label) return;
+
+    var target = 82;
+    var duration = 2200;
+    var startTs = null;
+
+    fill.style.transition = "none";  // ה-rAF מנהל את הרוחב, לא ה-CSS
+    fill.style.width = "0%";
+    label.textContent = "0% הושלם";
+
+    requestAnimationFrame(function step(ts) {
+      if (startTs === null) startTs = ts;
+      var p = Math.min(1, (ts - startTs) / duration);
+      var eased = 1 - Math.pow(1 - p, 3);   // easeOutCubic — מאט לקראת הסוף
+      var val = target * eased;
+
+      fill.style.width = val.toFixed(1) + "%";
+      label.textContent = Math.round(val) + "% הושלם";
+
+      if (p < 1) requestAnimationFrame(step);
+    });
+  }
+
   // ---------- אנימציית מונים (מסך תדריך) ----------
   function animateCounters() {
     var nums = document.querySelectorAll("[data-count]");
@@ -447,4 +485,6 @@
 
   // התחל תמיד מהנחיתה (מתיחה חד-פעמית; לא משחזרים אמצע)
   show("landing");
+  // השהיה קצרה כדי שהעין תספיק לתפוס שהפס מתחיל מאפס
+  setTimeout(animateKnowledgeTransfer, 450);
 })();
