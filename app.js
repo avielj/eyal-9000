@@ -313,33 +313,46 @@
     if (el) el.textContent = txt;
   }
 
-  // ---------- אנימציית "העברת ידע" (מסך נחיתה) ----------
-  // מטפס מ-0% ל-82% עם האטה לקראת הסוף, כדי שייראה כמו תהליך אמיתי
-  // ולא כמו מספר קבוע שנצבע מראש.
-  function animateKnowledgeTransfer() {
-    var fill = document.getElementById("ktProgress");
-    var label = document.getElementById("ktPct");
-    if (!fill || !label) return;
+  // ---------- העברת ידע — מתקדמת עם התשובות ----------
+  // מתחיל ב-0% בטעינה, וכל תשובה מעלה את האחוז. התשובה האחרונה מגיעה ל-100%.
+  var ktCurrent = 0;
 
-    var target = 82;
-    var duration = 2200;
+  function tween(from, to, duration, onStep, onDone) {
     var startTs = null;
-
-    fill.style.transition = "none";  // ה-rAF מנהל את הרוחב, לא ה-CSS
-    fill.style.width = "0%";
-    label.textContent = "0% הושלם";
-
     requestAnimationFrame(function step(ts) {
       if (startTs === null) startTs = ts;
       var p = Math.min(1, (ts - startTs) / duration);
-      var eased = 1 - Math.pow(1 - p, 3);   // easeOutCubic — מאט לקראת הסוף
-      var val = target * eased;
-
-      fill.style.width = val.toFixed(1) + "%";
-      label.textContent = Math.round(val) + "% הושלם";
-
+      var eased = 1 - Math.pow(1 - p, 3);   // easeOutCubic
+      onStep(from + (to - from) * eased);
       if (p < 1) requestAnimationFrame(step);
+      else if (onDone) onDone();
     });
+  }
+
+  function setKnowledgeTransfer(pct, instant) {
+    var from = ktCurrent;
+    ktCurrent = pct;
+
+    var bar = document.getElementById("quizProgress");
+    var label = document.getElementById("quizKtPct");
+    if (bar) {
+      bar.style.width = pct + "%";       // ה-CSS transition מניע את הרוחב
+      bar.classList.toggle("working", pct < 100);
+    }
+    if (!label) return;
+
+    if (instant || from === pct) {
+      label.textContent = Math.round(pct) + "%";
+      return;
+    }
+    tween(from, pct, 900, function (v) {
+      label.textContent = Math.round(v) + "%";
+    });
+  }
+
+  // אחוז העברת הידע לפי מספר התשובות שניתנו
+  function ktPercentFor(answered) {
+    return Math.round((answered / QUESTIONS.length) * 100);
   }
 
   // ---------- אנימציית מונים (מסך תדריך) ----------
@@ -364,8 +377,8 @@
     setText("qNum", state.qIndex + 1);
     setText("qTotal", QUESTIONS.length);
     setText("questionText", item.q);
-    document.getElementById("quizProgress").style.width =
-      Math.round((state.qIndex / QUESTIONS.length) * 100) + "%";
+    // מציג את המצב הנוכחי בלי אנימציה — הטיפוס עצמו קורה ברגע המענה
+    setKnowledgeTransfer(ktPercentFor(state.qIndex), true);
 
     var fb = document.getElementById("feedback");
     fb.classList.remove("show");
@@ -394,13 +407,16 @@
     fb.textContent = item.feedback;
     fb.classList.add("show");
 
-    track("ענה על שאלה " + (state.qIndex + 1) + ": “" + item.a[idx] + "”");
+    // האחוז מטפס מיד עם המענה, בזמן שהמשוב מוצג
+    setKnowledgeTransfer(ktPercentFor(state.qIndex + 1));
+
+    track("ענה על שאלה " + (state.qIndex + 1) + ": “" + item.a[idx] + "”" +
+      " · העברת ידע: " + ktPercentFor(state.qIndex + 1) + "%");
 
     setTimeout(function () {
       state.qIndex++;
       save();
       if (state.qIndex >= QUESTIONS.length) {
-        document.getElementById("quizProgress").style.width = "100%";
         startProcessing();
       } else {
         renderQuestion();
@@ -485,6 +501,4 @@
 
   // התחל תמיד מהנחיתה (מתיחה חד-פעמית; לא משחזרים אמצע)
   show("landing");
-  // השהיה קצרה כדי שהעין תספיק לתפוס שהפס מתחיל מאפס
-  setTimeout(animateKnowledgeTransfer, 450);
 })();
