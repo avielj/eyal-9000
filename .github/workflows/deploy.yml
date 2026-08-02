@@ -36,6 +36,23 @@ jobs:
             exit 0
           fi
 
+          # ניקוי רווחים/שורות חדשות שנדבקו בטעות בהעתקה לתוך ה-Secret
+          TELEGRAM_BOT_TOKEN="$(printf '%s' "$TELEGRAM_BOT_TOKEN" | tr -d '[:space:]')"
+          TELEGRAM_CHAT_ID="$(printf '%s' "$TELEGRAM_CHAT_ID" | tr -d '[:space:]')"
+          export TELEGRAM_BOT_TOKEN TELEGRAM_CHAT_ID
+
+          # בדיקת צורה — מאבחנת ערכים מוחלפים או הדבקה חלקית בלי לחשוף את הערך.
+          # (GitHub ממסך את ערך הסוד בלוג; אורך בלבד אינו מסגיר אותו.)
+          if ! printf '%s' "$TELEGRAM_BOT_TOKEN" | grep -qE '^[0-9]{6,12}:[A-Za-z0-9_-]{30,}$'; then
+            echo "::error::TELEGRAM_BOT_TOKEN בצורה שגויה (אורך=${#TELEGRAM_BOT_TOKEN})."
+            echo "::error::מצופה <ספרות>:<35+ תווים>. בדוק שלא התחלפו הערכים בין שני הסודות ושלא הודבק רק חלק מהטוקן."
+            exit 1
+          fi
+          if ! printf '%s' "$TELEGRAM_CHAT_ID" | grep -qE '^-?[0-9]+$'; then
+            echo "::error::TELEGRAM_CHAT_ID בצורה שגויה (אורך=${#TELEGRAM_CHAT_ID}) — מצופות ספרות בלבד."
+            exit 1
+          fi
+
           node - <<'EOF'
           const fs = require("fs");
           const file = "config.js";
@@ -95,6 +112,10 @@ jobs:
             echo "::warning::Telegram secrets not set — skipping bot verification."
             exit 0
           fi
+
+          # אותו ניקוי כמו בשלב ההזרקה — env לא עובר בין שלבים
+          TELEGRAM_BOT_TOKEN="$(printf '%s' "$TELEGRAM_BOT_TOKEN" | tr -d '[:space:]')"
+          TELEGRAM_CHAT_ID="$(printf '%s' "$TELEGRAM_CHAT_ID" | tr -d '[:space:]')"
 
           TEXT="🤖 בדיקת מערכת — הבוט עובד.
 
